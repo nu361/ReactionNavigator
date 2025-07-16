@@ -5,10 +5,8 @@ from rdkit import Chem
 from rdkit.Chem import Draw
 import pandas as pd
 from io import StringIO
-
 st.title('🪄 Reaction Pathway Predictor')
 st.subheader('Prediksi Jalur Reaksi Kimia Berdasarkan Parameter Analisis')
-
 # Sidebar untuk parameter input
 with st.sidebar:
     st.header('Parameter Reaksi')
@@ -17,12 +15,10 @@ with st.sidebar:
     concentration = st.slider('Konsentrasi (mol/L)', 0.1, 5.0, 1.0)
     solvent = st.selectbox('Pelarut', ['Air', 'Etanol', 'Aseton', 'Dietil Eter', 'DMSO'])
     catalyst = st.checkbox('Ada Katalis?')
-    
     if catalyst:
         catalyst_type = st.selectbox('Jenis Katalis', [
             'Asam', 'Basa', 'Logam Transisi', 'Enzim'
         ])
-
 # Input senyawa awal
 st.header('Masukkan Reaktan')
 col1, col2 = st.columns(2)
@@ -30,19 +26,16 @@ with col1:
     reactant1 = st.text_input('Reaktan 1 (SMILES)', 'C=O')
 with col2:
     reactant2 = st.text_input('Reaktan 2 (SMILES)', 'O')
-
 # Fungsi untuk validasi SMILES
 def validate_smiles(smiles):
     mol = Chem.MolFromSmiles(smiles)
     if mol is None:
         return False
     return True
-
 # Fungsi untuk memprediksi jalur reaksi (simulasi)
 def predict_reaction_pathway(r1, r2, temp, ph, conc, solvent, catalyst=None):
     # Ini adalah simulasi - dalam aplikasi nyata akan menggunakan library kimia
-    pathways = []
-    
+    pathways = [] 
     # Contoh sederhana untuk reaksi aldehid + air
     if r1 == 'C=O' and r2 == 'O':
         pathways.append({
@@ -56,7 +49,6 @@ def predict_reaction_pathway(r1, r2, temp, ph, conc, solvent, catalyst=None):
             'activation_energy': 75 - (ph * 2) - (temp * 0.1),
             'thermodynamics': 'Eksotermik'
         })
-    
     # Contoh lain untuk reaksi esterifikasi
     elif r1 == 'CC(=O)O' and r2 == 'CO':
         pathways.append({
@@ -83,9 +75,7 @@ def predict_reaction_pathway(r1, r2, temp, ph, conc, solvent, catalyst=None):
             'activation_energy': 85 - (ph * 1.5) - (temp * 0.15),
             'thermodynamics': 'Eksotermik'
         })
-    
     return pathways
-
 # Tombol prediksi
 if st.button('Prediksi Jalur Reaksi'):
     if not validate_smiles(reactant1) or not validate_smiles(reactant2):
@@ -96,25 +86,19 @@ if st.button('Prediksi Jalur Reaksi'):
             pathways = predict_reaction_pathway(
                 reactant1, reactant2, temperature, ph, 
                 concentration, solvent, catalyst if catalyst else None
-            )
-            
+            )            
             # Tampilkan hasil
             st.success('Prediksi berhasil!')
-            
             for pathway in pathways:
                 st.subheader(f"Jalur: {pathway['name']}")
-                
                 # Diagram energi
                 st.markdown("### Diagram Energi Potensial")
                 fig, ax = plt.subplots()
-                
                 steps = [step[0] for step in pathway['steps']]
                 energies = [step[1] for step in pathway['steps']]
-                
                 # Tambahkan reaktan dan produk
                 steps = ['Reaktan'] + steps + ['Produk']
                 energies = [0] + energies + [energies[-1] - 20]
-                
                 ax.plot(steps, energies, marker='o')
                 ax.set_ylabel('Energi (kJ/mol)')
                 ax.set_xlabel('Tahapan Reaksi')
@@ -122,14 +106,12 @@ if st.button('Prediksi Jalur Reaksi'):
                 plt.xticks(rotation=45)
                 plt.tight_layout()
                 st.pyplot(fig)
-                
                 # Tampilkan parameter kunci
                 col1, col2 = st.columns(2)
                 with col1:
                     st.metric("Energi Aktivasi", f"{pathway['activation_energy']:.1f} kJ/mol")
                 with col2:
                     st.metric("Termodinamika", pathway['thermodynamics'])
-                
                 # Tampilkan tahapan
                 st.markdown("### Tahapan Reaksi")
                 for i, step in enumerate(pathway['steps'], 1):
@@ -167,8 +149,7 @@ with st.expander('Optimasi Kondisi Reaksi'):
             f"{temperature + 10}°C" if temperature < 100 else "Cukup",
             "Asam (pH 3-6)" if ph > 6 else "Basa (pH 8-11)" if ph < 8 else "Netral (baik)",
             f"{concentration * 1.2:.1f} M" if concentration < 3 else "Cukup",
-            "Pertahankan" if solvent in ['Air', 'Etanol'] else "Coba ganti ke Air"
-        ]
+            "Pertahankan" if solvent in ['Air', 'Etanol'] else "Coba ganti ke Air"]
     }
     
     st.table(pd.DataFrame(data))
